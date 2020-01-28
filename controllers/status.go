@@ -87,7 +87,7 @@ func deploymentStatus(u *unstructured.Unstructured) (string, error) {
 		return "", err
 	}
 	if found {
-		if conditionStatus != corev1.ConditionFalse {
+		if conditionStatus == corev1.ConditionFalse {
 			available = false
 		}
 	}

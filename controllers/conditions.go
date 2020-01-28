@@ -1,29 +1,39 @@
 package controllers
 
 import (
+	appv1beta1 "github.com/mortent/application/api/v1beta1"
 	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	appv1beta1 "sigs.k8s.io/application/api/v1beta1"
 )
 
-func setReadyCondition(appStatus appv1beta1.ApplicationStatus, reason, message string) {
+func setReadyCondition(appStatus *appv1beta1.ApplicationStatus, reason, message string) {
 	setCondition(appStatus, appv1beta1.Ready, reason, message)
 }
 
-// NotReady - shortcut to set ready contition to false
-func setNotReadyCondition(appStatus appv1beta1.ApplicationStatus, reason, message string) {
+// NotReady - shortcut to set ready condition to false
+func setNotReadyCondition(appStatus *appv1beta1.ApplicationStatus, reason, message string) {
 	clearCondition(appStatus, appv1beta1.Ready, reason, message)
 }
 
-func setCondition(appStatus appv1beta1.ApplicationStatus, ctype appv1beta1.ConditionType, reason, message string) {
+// setErrorCondition - shortcut to set error condition
+func setErrorCondition(appStatus *appv1beta1.ApplicationStatus, reason, message string) {
+	setCondition(appStatus, appv1beta1.Error, reason, message)
+}
+
+// clearErrorCondition - shortcut to set error condition
+func clearErrorCondition(appStatus *appv1beta1.ApplicationStatus) {
+	clearCondition(appStatus, appv1beta1.Error, "NoError", "No error seen")
+}
+
+func setCondition(appStatus *appv1beta1.ApplicationStatus, ctype appv1beta1.ConditionType, reason, message string) {
 	setConditionValue(appStatus, ctype, corev1.ConditionTrue, reason, message)
 }
 
-func clearCondition(appStatus appv1beta1.ApplicationStatus, ctype appv1beta1.ConditionType, reason, message string) {
+func clearCondition(appStatus *appv1beta1.ApplicationStatus, ctype appv1beta1.ConditionType, reason, message string) {
 	setConditionValue(appStatus, ctype, corev1.ConditionFalse, reason, message)
 }
 
-func setConditionValue(appStatus appv1beta1.ApplicationStatus, ctype appv1beta1.ConditionType, status corev1.ConditionStatus, reason, message string) {
+func setConditionValue(appStatus *appv1beta1.ApplicationStatus, ctype appv1beta1.ConditionType, status corev1.ConditionStatus, reason, message string) {
 	var c *appv1beta1.Condition
 	for i := range appStatus.Conditions {
 		if appStatus.Conditions[i].Type == ctype {
@@ -48,7 +58,7 @@ func setConditionValue(appStatus appv1beta1.ApplicationStatus, ctype appv1beta1.
 	}
 }
 
-func addCondition(appStatus appv1beta1.ApplicationStatus, ctype appv1beta1.ConditionType, status corev1.ConditionStatus, reason, message string) {
+func addCondition(appStatus *appv1beta1.ApplicationStatus, ctype appv1beta1.ConditionType, status corev1.ConditionStatus, reason, message string) {
 	now := metav1.Now()
 	c := appv1beta1.Condition{
 		Type:               ctype,
